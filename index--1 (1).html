@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City-Coin Investment Dashboard</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            padding-top: 60px; 
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .top-nav {
+            background-color: #1a1a1a;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: flex-start; 
+            align-items: center; 
+            border-bottom: 1px solid #333;
+            flex-wrap: wrap; 
+            z-index: 1000; 
+        }
+        .top-nav h1 {
+            color: #f0b90b;
+            margin-right: 20px;
+            font-size: 18px;
+        }
+        .top-nav a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 15px;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+        .top-nav a:hover {
+            background-color: #333;
+        }
+     
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #f0b90b;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #333;
+            color: #ffffff;
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 10px;
+            background-color: #f0b90b;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-content button:hover {
+            background-color: #e6a800;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        
+        .dashboard {
+            display: none;
+            padding: 20px;
+        }
+        .balances {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .balance-card {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+        }
+        .balance-card h3 {
+            color: #f0b90b;
+        }
+        .balance-card p {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        .charts {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            margin: 0 10px;
+        }
+        .chart-container h3 {
+            margin-bottom: 20px;
+            color: #f0b90b;
+        }
+        .pricing {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .pricing h3 {
+            color: #f0b90b;
+            margin-bottom: 20px;
+        }
+        .price-table {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .price-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+        .price-card h4 {
+            color: #f0b90b;
+        }
+        .price-card p {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+        .recent-transactions {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .recent-transactions h3 {
+            color: #f0b90b;
+            margin-bottom: 20px;
+        }
+        .transaction {
+            background-color: #333;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .actions button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #f0b90b;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .actions button:hover {
+            background-color: #e6a800;
+        }
+        
+        .investment {
+            display: none;
+            padding: 20px;
+        }
+        .investment h2 {
+            color: #f0b90b;
+            margin-bottom: 20px;
+        }
+        .investment-form {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .investment-form input, .investment-form select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #333;
+            color: #ffffff;
+        }
+        .investment-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #f0b90b;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .investment-form button:hover {
+            background-color: #e6a800;
+        }
+      
+        .history {
+            display: none;
+            padding: 20px;
+        }
+        .history h2 {
+            color: #f0b90b;
+            margin-bottom: 20px;
+        }
+        .transaction {
+            background-color: #1a1a1a;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+    
+        footer {
+            background-color: #1a1a1a;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #333;
+            margin-top: 20px;
+        }
+        footer a {
+            color: #f0b90b;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+      
+        @media (max-width: 768px) {
+            .balances {
+                flex-direction: column;
+            }
+            .balance-card {
+                margin: 10px 0;
+            }
+            .charts {
+                flex-direction: column;
+            }
+            .chart-container {
+                margin: 10px 0;
+            }
+            .price-table {
+                flex-direction: column;
+            }
+            .top-nav {
+                justify-content: center; 
+                flex-wrap: wrap;
+            }
+            .top-nav h1 {
+                font-size: 16px;
+                margin-right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <h1>City-Coin Investment</h1>
+        <a href="#" onclick="showSection('dashboard')">Dashboard</a>
+        <a href="#" onclick="showSection('investment')">Invest</a>
+        <a href="#" onclick="showSection('history')">History</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+
+    
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2>Login</h2>
+            <input type="email" id="username" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <div id="errorMsg" class="error"></div>
+        </div>
+    </div>
+
+  
+    <div id="dashboard" class="dashboard">
+        <div class="container">
+            <h1>Dashboard</h1>
+            <div class="balances">
+                <div class="balance-card">
+                    <h3>Main Balance</h3>
+                    <p id="mainBalance">$300.00</p>
+                </div>
+                <div class="balance-card">
+                    <h3>Invested Balance</h3>
+                    <p id="investedBalance">$1,000.00</p>
+                </div>
+                <div class="balance-card">
+                    <h3>Total Portfolio</h3>
+                    <p id="totalPortfolio">$2,090.00</p>
+                </div>
+                <div class="balance-card">
+                    <h3>24h Change</h3>
+                    <p style="color: green;">+$60.00</p>
+                </div>
+            </div>
+            <div class="charts">
+                <div class="chart-container">
+                    <h3>Portfolio Value Over Time</h3>
+                    <canvas id="portfolioChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Asset Allocation</h3>
+                    <canvas id="allocationChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Investment Growth</h3>
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+            <div class="pricing">
+                <h3>Cryptocurrency Prices</h3>
+                <div class="price-table">
+                    <div class="price-card">
+                        <h4>Bitcoin (BTC)</h4>
+                        <p id="btcPrice">$86,979.29</p>
+                        <p style="color: green;">+7.5%</p>
+                    </div>
+                    <div class="price-card">
+                        <h4>Ethereum (ETH)</h4>
+                        <p id="ethPrice">$2,926.91</p>
+                        <p style="color: red;">-1.2%</p>
+                    </div>
+                    <div class="price-card">
+                        <h4>Binance Coin (BNB)</h4>
+                        <p id="bnbPrice">$837.57</p>
+                        <p style="color: green;">+0.8%</p>
+                    </div>
+                    <div class="price-card">
+                        <h4>Solana (SOL)</h4>
+                        <p id="solPrice">$121.93</p>
+                        <p style="color: green;">+3.1%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="recent-transactions">
+                <h3>Recent Transactions</h3>
+                <div class="transaction">
+                    <span>Deposit $1,000</span>
+                    <span>2023-10-01</span>
+                </div>
+                <div class="transaction">
+                    <span>Invest $500 in BTC</span>
+                    <span>2023-10-02</span>
+                </div>
+                <div class="transaction">
+                    <span>Withdraw $200</span>
+                    <span>2023-10-03</span>
+                </div>
+            </div>
+            <div class="actions">
+                <button onclick="deposit()">Deposit</button>
+                <button onclick="withdraw()">Withdraw</button>
+            </div>
+        </div>
+    </div>
+
+   
+    <div id="investment" class="investment">
+        <div class="container">
+            <h2>Invest in Crypto</h2>
+            <div class="investment-form">
+                <select id="crypto">
+                    <option value="BTC">Bitcoin (BTC)</option>
+                    <option value="ETH">Ethereum (ETH)</option>
+                    <option value="BNB">Binance Coin (BNB)</option>
+                    <option value="SOL">Solana (SOL)</option>
+                </select>
+                <input type="number" id="amount" placeholder="Amount in USD">
+                <button onclick="invest()">Invest</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="history" class="history">
+        <div class="container">
+            <h2>Transaction History</h2>
+            <div id="transactions">
+                <div class="transaction">
+                    <span>Deposit $500</span>
+                    <span>2025-10-01</span>
+                </div>
+                <div class="transaction">
+                    <span>Invest $500 in BTC</span>
+                    <span>2025-10-02</span>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+
+   
+    <footer>
+        <a href="#">About</a>
+        <a href="#">Support</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+    </footer>
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        
+        window.onload = function() {
+            document.getElementById('loginModal').style.display = 'flex';
+        };
+
+       
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            if (username === 'myonlymommy2025acc@gmail.com' && password === 'myonlymommy@123') {
+                document.getElementById('loginModal').style.display = 'none';
+                showSection('dashboard');
+                errorMsg.innerText = '';
+            } else {
+                errorMsg.innerText = 'WRONG PASSWORD';
+            }
+        }
+
+        
+        function showSection(section) {
+            document.querySelectorAll('.dashboard, .investment, .history').forEach(el => el.style.display = 'none');
+            document.getElementById(section).style.display = 'block';
+        }
+
+        
+        function logout() {
+            document.getElementById('loginModal').style.display = 'flex';
+            showSection('dashboard');
+        }
+
+        
+        function deposit() {
+            alert('NEW DEVICE DETECTED. PLEASE COMPLETE 2-FACTOR AUTHENTICATION TO PROCEED USING PRIMARY DEVICE .');
+        }
+
+        
+        function withdraw() {
+            alert('NEW DEVICE DETECTED. PLEASE COMPLETE 2-FACTOR AUTHENTICATION TO PROCEED USING PRIMARY DEVICE');
+        }
+
+        
+        function invest() {
+            const crypto = document.getElementById('crypto').value;
+            const amount = document.getElementById('amount').value;
+            if (amount) {
+                alert(`USE PRIMARY DEVICE TO INVEST $${amount} in ${crypto}`);
+                
+                const invested = parseFloat(document.getElementById('investedBalance').innerText.replace('$', '').replace(',', ''));
+                document.getElementById('investedBalance').innerText = `$${(invested + parseFloat(amount)).toFixed(2)}`;
+                updateTotal();
+            } else {
+                alert('Please enter amount');
+            }
+        }
+
+        
+        function updateTotal() {
+            const main = parseFloat(document.getElementById('mainBalance').innerText.replace('$', '').replace(',', ''));
+            const invested = parseFloat(document.getElementById('investedBalance').innerText.replace('$', '').replace(',', ''));
+            document.getElementById('totalPortfolio').innerText = `$${(main + invested).toFixed(2)}`;
+        }
+
+        
+        const ctx1 = document.getElementById('portfolioChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Portfolio Value',
+                    data: [10000, 11000, 10500, 12000, 11500, 15000],
+                    borderColor: '#f0b90b',
+                    backgroundColor: 'rgba(240, 185, 11, 0.1)',
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+       
+        const ctx2 = document.getElementById('allocationChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: ['BTC', 'ETH', 'BNB', 'Others'],
+                datasets: [{
+                    data: [40, 30, 20, 10],
+                    backgroundColor: ['#f0b90b', '#333', '#666', '#999'],
+                }]
+            },
+            options: {
+                responsive: true,
+            }
+        });
+
+        
+        const ctx3 = document.getElementById('growthChart').getContext('2d');
+        new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: ['BTC', 'ETH', 'BNB', 'SOL'],
+                datasets: [{
+                    label: 'Investment Amount',
+                    data: [2000, 1500, 1000, 500],
+                    backgroundColor: '#f0b90b',
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
