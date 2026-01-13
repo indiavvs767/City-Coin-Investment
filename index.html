@@ -460,132 +460,162 @@
 
 
   
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        
-        window.onload = function() {
-            document.getElementById('loginModal').style.display = 'flex';
-        };
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
 
-       
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMsg = document.getElementById('errorMsg');
-            if (username === 'indiavvs767@gmail.com' && password === 'anthony&nikki2026') {
-                document.getElementById('loginModal').style.display = 'none';
-                showSection('dashboard');
-                errorMsg.innerText = '';
-            } else {
-                errorMsg.innerText = 'WRONG PASSWORD';
-            }
+    /* ================= COOKIE HELPERS ================= */
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
         }
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
 
-        
-        function showSection(section) {
-            document.querySelectorAll('.dashboard, .investment, .history').forEach(el => el.style.display = 'none');
-            document.getElementById(section).style.display = 'block';
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
         }
+        return null;
+    }
 
-        
-        function logout() {
-            document.getElementById('loginModal').style.display = 'flex';
+    function eraseCookie(name) {
+        document.cookie = name + "=; Max-Age=0; path=/";
+    }
+    /* ================================================== */
+
+    window.onload = function () {
+        const loggedIn = getCookie("loggedIn");
+
+        if (loggedIn === "true") {
+            document.getElementById('loginModal').style.display = 'none';
             showSection('dashboard');
+        } else {
+            document.getElementById('loginModal').style.display = 'flex';
         }
+    };
 
-        
-        function deposit() {
-            alert('NEW DEVICE DETECTED. PLEASE COMPLETE 2-FACTOR AUTHENTICATION TO PROCEED USING PRIMARY DEVICE .');
+    function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMsg = document.getElementById('errorMsg');
+
+        if (username === 'indiavvs767@gmail.com' && password === 'anthony&nikki2026') {
+            setCookie("loggedIn", "true", 365); // stays logged in for 7 days
+            document.getElementById('loginModal').style.display = 'none';
+            showSection('dashboard');
+            errorMsg.innerText = '';
+        } else {
+            errorMsg.innerText = 'WRONG PASSWORD';
         }
+    }
 
-        
-        function withdraw() {
-            alert('NEW DEVICE DETECTED. PLEASE COMPLETE 2-FACTOR AUTHENTICATION TO PROCEED USING PRIMARY DEVICE');
+    function showSection(section) {
+        document.querySelectorAll('.dashboard, .investment, .history')
+            .forEach(el => el.style.display = 'none');
+        document.getElementById(section).style.display = 'block';
+    }
+
+    function logout() {
+        eraseCookie("loggedIn");
+        document.getElementById('loginModal').style.display = 'flex';
+        showSection('dashboard');
+    }
+
+    function deposit() {
+        alert('NEW DEVICE DETECTED. PLEASE COMPLETE 2-FACTOR AUTHENTICATION TO PROCEED USING PRIMARY DEVICE .');
+    }
+
+    function withdraw() {
+        alert('NEW DEVICE DETECTED. PLEASE COMPLETE 2-FACTOR AUTHENTICATION TO PROCEED USING PRIMARY DEVICE');
+    }
+
+    function invest() {
+        const crypto = document.getElementById('crypto').value;
+        const amount = document.getElementById('amount').value;
+
+        if (amount) {
+            alert(`USE PRIMARY DEVICE TO INVEST $${amount} in ${crypto}`);
+
+            const invested = parseFloat(
+                document.getElementById('investedBalance').innerText.replace('$', '').replace(',', '')
+            );
+
+            document.getElementById('investedBalance').innerText =
+                `$${(invested + parseFloat(amount)).toFixed(2)}`;
+
+            updateTotal();
+        } else {
+            alert('Please enter amount');
         }
+    }
 
-        
-        function invest() {
-            const crypto = document.getElementById('crypto').value;
-            const amount = document.getElementById('amount').value;
-            if (amount) {
-                alert(`USE PRIMARY DEVICE TO INVEST $${amount} in ${crypto}`);
-                
-                const invested = parseFloat(document.getElementById('investedBalance').innerText.replace('$', '').replace(',', ''));
-                document.getElementById('investedBalance').innerText = `$${(invested + parseFloat(amount)).toFixed(2)}`;
-                updateTotal();
-            } else {
-                alert('Please enter amount');
-            }
+    function updateTotal() {
+        const main = parseFloat(
+            document.getElementById('mainBalance').innerText.replace('$', '').replace(',', '')
+        );
+        const invested = parseFloat(
+            document.getElementById('investedBalance').innerText.replace('$', '').replace(',', '')
+        );
+        document.getElementById('totalPortfolio').innerText =
+            `$${(main + invested).toFixed(2)}`;
+    }
+
+    const ctx1 = document.getElementById('portfolioChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Portfolio Value',
+                data: [10000, 11000, 10500, 12000, 11500, 15000],
+                borderColor: '#f0b90b',
+                backgroundColor: 'rgba(240, 185, 11, 0.1)',
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
         }
+    });
 
-        
-        function updateTotal() {
-            const main = parseFloat(document.getElementById('mainBalance').innerText.replace('$', '').replace(',', ''));
-            const invested = parseFloat(document.getElementById('investedBalance').innerText.replace('$', '').replace(',', ''));
-            document.getElementById('totalPortfolio').innerText = `$${(main + invested).toFixed(2)}`;
+    const ctx2 = document.getElementById('allocationChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: ['BTC', 'ETH', 'BNB', 'Others'],
+            datasets: [{
+                data: [40, 30, 20, 10],
+                backgroundColor: ['#f0b90b', '#333', '#666', '#999'],
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    const ctx3 = document.getElementById('growthChart').getContext('2d');
+    new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: ['BTC', 'ETH', 'BNB', 'SOL'],
+            datasets: [{
+                label: 'Investment Amount',
+                data: [2000, 1500, 1000, 500],
+                backgroundColor: '#f0b90b',
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
         }
+    });
 
-        
-        const ctx1 = document.getElementById('portfolioChart').getContext('2d');
-        new Chart(ctx1, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Portfolio Value',
-                    data: [10000, 11000, 10500, 12000, 11500, 15000],
-                    borderColor: '#f0b90b',
-                    backgroundColor: 'rgba(240, 185, 11, 0.1)',
-                    fill: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-       
-        const ctx2 = document.getElementById('allocationChart').getContext('2d');
-        new Chart(ctx2, {
-            type: 'pie',
-            data: {
-                labels: ['BTC', 'ETH', 'BNB', 'Others'],
-                datasets: [{
-                    data: [40, 30, 20, 10],
-                    backgroundColor: ['#f0b90b', '#333', '#666', '#999'],
-                }]
-            },
-            options: {
-                responsive: true,
-            }
-        });
-
-        
-        const ctx3 = document.getElementById('growthChart').getContext('2d');
-        new Chart(ctx3, {
-            type: 'bar',
-            data: {
-                labels: ['BTC', 'ETH', 'BNB', 'SOL'],
-                datasets: [{
-                    label: 'Investment Amount',
-                    data: [2000, 1500, 1000, 500],
-                    backgroundColor: '#f0b90b',
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
+</script>
 </body>
 </html>
